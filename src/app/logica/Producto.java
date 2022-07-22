@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -25,6 +27,13 @@ public class Producto {
     private double precio;
 
     public Producto() {
+    }
+
+    public Producto(String nombre, int cantidad, String categoria, double precio) {
+        this.nombre = nombre;
+        this.cantidad = cantidad;
+        this.categoria = categoria;
+        this.precio = precio;
     }
 
     public Producto(int id, String nombre, int cantidad, String categoria, double precio) {
@@ -74,10 +83,10 @@ public class Producto {
     public void setPrecio(double precio) {
         this.precio = precio;
     }
-    
+
     @Override
-    public String toString(){
-        return "Producto: "+nombre+ " con ID: "+id;
+    public String toString() {
+        return "Producto: " + nombre + " con ID: " + id;
     }
 
     public List<Producto> listarProductos() {
@@ -95,11 +104,11 @@ public class Producto {
             while (resultado.next()) {
 
                 p = new Producto();
-                p.setId( resultado.getInt("id") );
-                p.setNombre( resultado.getString("nombre"));
-                p.setCategoria( resultado.getString("categoria"));
-                p.setCantidad( resultado.getInt("cantidad"));
-                p.setPrecio( resultado.getDouble("precio"));
+                p.setId(resultado.getInt("id"));
+                p.setNombre(resultado.getString("nombre"));
+                p.setCategoria(resultado.getString("categoria"));
+                p.setCantidad(resultado.getInt("cantidad"));
+                p.setPrecio(resultado.getDouble("precio"));
 
                 listaProductos.add(p);
 
@@ -114,20 +123,81 @@ public class Producto {
         return listaProductos;
 
     }
-    
-    public boolean guardarProducto(){
-        
+
+    public Producto seleccionarProducto() {
+
         ConexionBD conexion = new ConexionBD();
+        String sql = "SELECT * FROM producto WHERE id=" + id;
+
+        ResultSet resultado = conexion.consultarBD(sql);
+        Producto p = null;
+
+        try {
+            if ( resultado.next() ) {
+                
+                p = new Producto();
+                p.setId( resultado.getInt("id") );
+                p.setNombre( resultado.getString("nombre") );
+                p.setCategoria( resultado.getString("categoria") );
+                p.setCantidad(resultado.getInt("cantidad"));
+                p.setPrecio(resultado.getDouble("precio"));
+                
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Producto.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return p;
         
-        String sql = String.format( Locale.ROOT, "INSERT INTO producto (nombre,cantidad,categoria,precio) VALUES ( '%s', %d, '%s', %.2f );" , nombre, cantidad, categoria, precio );
-        
-        if ( conexion.insertar( sql ) == true ){
+    }
+
+    public boolean guardarProducto() {
+
+        ConexionBD conexion = new ConexionBD();
+
+        String sql = String.format(Locale.ROOT,
+                "INSERT INTO producto (nombre,cantidad,categoria,precio) VALUES ( '%s', %d, '%s', %.2f );",
+                nombre, cantidad, categoria, precio);
+
+        if (conexion.insertar(sql) == true) {
             conexion.closeConnection();
             return true;
-        }else{
+        } else {
             return false;
         }
-        
-    } 
+
+    }
+
+    public boolean actualizarProducto() {
+        ConexionBD conexion = new ConexionBD();
+
+        // No utilizaremos String.format( ) para ver como sea crea de otra forma
+        String sql = " UPDATE producto "
+                + "SET nombre='" + nombre + "', categoria='" + categoria + "', "
+                + "cantidad=" + cantidad + ", precio=" + precio + " WHERE id = " + id;
+
+        if (conexion.actualizar(sql) == true) {
+            conexion.closeConnection();
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public boolean borrarProducto() {
+
+        ConexionBD conexion = new ConexionBD();
+
+        String sql = "DELETE FROM producto WHERE id = " + id;
+
+        if (conexion.borrar(sql) == true) {
+            conexion.closeConnection();
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 
 }

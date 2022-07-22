@@ -73,16 +73,34 @@ public class ConexionBD {
     }
 
     public boolean insertar(String sentencia) {
-
         try {
             stmt = con.createStatement();
             stmt.execute(sentencia);
-        }catch(SQLException | RuntimeException e){
+        } catch (SQLException | RuntimeException e) {
             return false;
         }
-        
         return true;
+    }
 
+    public boolean actualizar(String sentencia) {
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sentencia);
+        } catch (SQLException | RuntimeException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean borrar(String sentencia) {
+        try {
+            stmt = con.createStatement();
+            stmt.execute(sentencia);
+        } catch (SQLException | RuntimeException e) {
+            return false;
+        }
+
+        return true;
     }
 
 }
